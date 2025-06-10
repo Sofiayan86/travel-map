@@ -1,0 +1,58 @@
+name: Deploy to GitHub Pages
+
+# 當推送到 main 分支時觸發此工作流程
+on:
+  push:
+    branches:
+      - main
+  # 允許你手動從 Actions 分頁執行此工作流程
+  workflow_dispatch:
+
+# 設定 GITHUB_TOKEN 的權限，允許部署到 GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 設定並行策略，確保不會有多個部署同時進行
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  # 部署工作
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      # 步驟 1: 拉取你的程式碼
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 步驟 2: 替換 API 金鑰佔位符
+      # 這個步驟會讀取你的 script.js 檔案，
+      # 找到 '__GOOGLE_API_KEY__' 這個字串，
+      # 並用你儲存在 GitHub Secret 中的金鑰替換它。
+      - name: Replace API Key
+        run: |
+          sed -i "s|__GOOGLE_API_KEY__|${{ secrets.GOOGLE_API_KEY }}|g" script.js
+        # 'sed' 是一個用來處理文字替換的強大工具。
+        # ${{ secrets.GOOGLE_API_KEY }} 是從 GitHub Secrets 讀取金鑰的語法。
+
+      # 步驟 3: 設定 GitHub Pages
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      # 步驟 4: 上傳部署產物 (你的整個專案資料夾)
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # 上傳整個儲存庫
+          path: '.'
+
+      # 步驟 5: 部署到 GitHub Pages
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
