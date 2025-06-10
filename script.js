@@ -22,7 +22,7 @@ let visibleSpots = [];
  */
 function loadGoogleMapsAPI() {
     // 檢查佔位符是否已被替換，若無，則顯示錯誤訊息
-    if (API_KEY === '__GOOGLE_API_KEY__') {
+    if (API_KEY === 'GOOGLE_API_KEY') {
         console.error("API 金鑰未被替換。請確保 GitHub Actions 工作流程已成功執行。");
         document.body.innerHTML = '<div style="color:red; text-align:center; padding-top: 50px; font-size: 20px;">錯誤：網站設定不正確。<br>API 金鑰遺失。</div>';
         return;
